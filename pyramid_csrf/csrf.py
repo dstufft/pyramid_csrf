@@ -93,8 +93,6 @@ def check_csrf(request):
 
                 raise InvalidCSRF(reason)
 
-        session = getattr(request, "_session", request.session)
-
         # Get the provided CSRF token from the request.
         request_token = request.POST.get("csrf_token", "")
         if not request_token:
@@ -105,9 +103,9 @@ def check_csrf(request):
         # with a scope or not.
         scope = request._csrf_scope
         if scope is None:
-            csrf_token = session.get_csrf_token()
+            csrf_token = request.csrf.get_token()
         else:
-            csrf_token = session.get_scoped_csrf_token(scope)
+            csrf_token = request.csrf.get_scoped_token(scope)
 
         if not hmac.compare_digest(csrf_token, request_token):
             raise InvalidCSRF(REASON_BAD_TOKEN)
